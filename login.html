@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Online Learning Platform</title>
+    <!-- External CSS for Login Page -->
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Sign In Section -->
+        <div id="sign-in-section">
+            <div class="login-header">
+                <h1>Welcome Back</h1>
+                <p>Please enter your details to sign in.</p>
+            </div>
+            <!-- Form navigates to home.html on submission -->
+            <form action="home.html" method="GET">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    <div class="forgot-password">
+                        <a href="#">Forgot password?</a>
+                    </div>
+                </div>
+                <button type="submit" class="login-btn">Sign In</button>
+            </form>
+            <div class="login-footer">
+                <p>Don't have an account? <a href="#" onclick="toggleForm('signup'); return false;">Sign up</a></p>
+            </div>
+        </div>
+
+        <!-- Sign Up Section -->
+        <div id="sign-up-section" style="display: none;">
+            <div class="login-header">
+                <h1>Create an Account</h1>
+                <p>Join us and start learning today.</p>
+            </div>
+            <form action="home.html" method="GET">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email Address</label>
+                    <input type="email" id="signup-email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" name="password" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+                </div>
+                <button type="submit" class="login-btn">Sign Up</button>
+            </form>
+            <div class="login-footer">
+                <p>Already have an account? <a href="#" onclick="toggleForm('signin'); return false;">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm(formType) {
+            const signInSection = document.getElementById('sign-in-section');
+            const signUpSection = document.getElementById('sign-up-section');
+            if (formType === 'signup') {
+                signInSection.style.display = 'none';
+                signUpSection.style.display = 'block';
+                document.title = "Register - Online Learning Platform";
+            } else {
+                signInSection.style.display = 'block';
+                signUpSection.style.display = 'none';
+                document.title = "Login - Online Learning Platform";
+            }
+        }
+    </script>
+</body>
+</html>
