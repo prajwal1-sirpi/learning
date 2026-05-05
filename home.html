@@ -45,7 +45,7 @@
                         <span class="text-gray-700 font-medium group-hover:text-blue-600 transition"
                             id="user-name-display">John Doe</span>
                     </div>
-                    <a href="login.html"
+                    <a href="#" id="logout-btn"
                         class="text-gray-500 hover:text-red-500 font-medium transition duration-150 flex items-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -329,6 +329,58 @@
                 toast.classList.add('translate-y-10', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
+        }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <!-- Firebase Auth Logic -->
+    <script>
+        // 1. Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBkQPyOFHFotKKqZvIupi_mXFSZEP5ONso",
+            authDomain: "edulearn-c81a8.firebaseapp.com",
+            projectId: "edulearn-c81a8",
+            storageBucket: "edulearn-c81a8.firebasestorage.app",
+            messagingSenderId: "243201120910",
+            appId: "1:243201120910:android:d8b506fb0b843c6cbc47df"
+        };
+
+        // 2. Initialize Firebase and Auth
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // 3. Protect Route: Redirect to login if user is not authenticated or not verified
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                // No user signed in -> Redirect to login
+                window.location.replace("login.html");
+            } else if (!user.emailVerified) {
+                // User signed in but email not verified -> Sign out and redirect
+                auth.signOut().then(() => {
+                    window.location.replace("login.html");
+                });
+            } else {
+                // User is signed in and verified -> Update UI with user info if needed
+                const userEmailDisplay = document.getElementById('profile-email');
+                if (userEmailDisplay) {
+                    userEmailDisplay.value = user.email;
+                }
+            }
+        });
+
+        // 4. Logout functionality
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await auth.signOut();
+                    // onAuthStateChanged will handle the redirect
+                } catch (error) {
+                    console.error("Sign out error:", error);
+                }
+            });
         }
     </script>
 </body>

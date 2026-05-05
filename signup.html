@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - EduLearn</title>
+    <title>Sign Up - EduLearn</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -13,20 +13,20 @@
 <body class="bg-gray-50 flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl">
         <div>
-            <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900">Welcome Back</h2>
+            <h2 class="mt-2 text-center text-3xl font-extrabold text-gray-900">Create an account</h2>
             <p class="mt-2 text-center text-sm text-gray-600">
-                Don't have an account?
-                <a href="signup.html" class="font-medium text-blue-600 hover:text-blue-500 transition">
-                    Sign up now
+                Or
+                <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500 transition">
+                    sign in to your existing account
                 </a>
             </p>
         </div>
         
-        <!-- Error Message Container -->
-        <div id="error-container" class="hidden rounded-md p-4 text-sm font-medium bg-red-50 text-red-800">
+        <!-- Error/Success Message Container -->
+        <div id="message-container" class="hidden rounded-md p-4 text-sm font-medium">
         </div>
 
-        <form id="login-form" class="mt-8 space-y-6">
+        <form id="signup-form" class="mt-8 space-y-6">
             <div class="rounded-md shadow-sm space-y-4">
                 <div>
                     <label for="email-address" class="block text-sm font-medium text-gray-700">Email address</label>
@@ -36,24 +36,16 @@
                 </div>
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input id="password" name="password" type="password" autocomplete="current-password" required 
+                    <input id="password" name="password" type="password" autocomplete="new-password" required 
                         class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm mt-1" 
-                        placeholder="Enter your password">
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between">
-                <div class="text-sm">
-                    <a href="forgot.html" class="font-medium text-blue-600 hover:text-blue-500">
-                        Forgot your password?
-                    </a>
+                        placeholder="Create a password (min 6 characters)">
                 </div>
             </div>
 
             <div>
-                <button type="submit" id="login-btn"
+                <button type="submit" id="signup-btn"
                     class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition shadow-md hover:shadow-lg">
-                    Sign in
+                    Sign up
                 </button>
             </div>
         </form>
@@ -78,62 +70,62 @@
         const auth = firebase.auth();
 
         // 3. UI Elements
-        const form = document.getElementById('login-form');
-        const errorContainer = document.getElementById('error-container');
-        const loginBtn = document.getElementById('login-btn');
+        const form = document.getElementById('signup-form');
+        const messageContainer = document.getElementById('message-container');
+        const signupBtn = document.getElementById('signup-btn');
 
-        function showError(msg) {
-            errorContainer.classList.remove('hidden');
-            errorContainer.innerText = msg;
+        function showMessage(msg, isError = false) {
+            messageContainer.classList.remove('hidden', 'bg-red-50', 'text-red-800', 'bg-green-50', 'text-green-800');
+            if (isError) {
+                messageContainer.classList.add('bg-red-50', 'text-red-800');
+            } else {
+                messageContainer.classList.add('bg-green-50', 'text-green-800');
+            }
+            messageContainer.innerText = msg;
         }
 
         // 4. Handle Form Submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            errorContainer.classList.add('hidden');
             
             const email = document.getElementById('email-address').value;
             const password = document.getElementById('password').value;
 
             try {
-                loginBtn.disabled = true;
-                loginBtn.innerText = "Signing in...";
+                // Disable button to prevent multiple clicks
+                signupBtn.disabled = true;
+                signupBtn.innerText = "Signing up...";
 
-                // Attempt to sign in
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-
-                // Check if email is verified
-                if (!user.emailVerified) {
-                    // Sign out the unverified user to prevent access
-                    await auth.signOut();
-                    showError("Please verify your email before logging in.");
-                } else {
-                    // User is verified and logged in -> redirect to home
-                    window.location.href = "home.html";
-                }
+                // Create user
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                
+                // Send email verification
+                await userCredential.user.sendEmailVerification();
+                
+                // Show success message
+                showMessage("Verification email sent. Please verify before login.", false);
+                form.reset();
 
             } catch (error) {
-                console.error("Login error:", error.code);
+                console.error("Signup error:", error.code);
                 // Handle common Firebase Auth errors
                 switch (error.code) {
-                    case 'auth/invalid-credential':
-                    case 'auth/user-not-found':
-                    case 'auth/wrong-password':
-                        showError("Invalid email or password.");
+                    case 'auth/email-already-in-use':
+                        showMessage("This email is already registered.", true);
                         break;
                     case 'auth/invalid-email':
-                        showError("Invalid email format.");
+                        showMessage("Invalid email format.", true);
                         break;
-                    case 'auth/too-many-requests':
-                        showError("Too many attempts. Please try again later.");
+                    case 'auth/weak-password':
+                        showMessage("Password should be at least 6 characters.", true);
                         break;
                     default:
-                        showError(error.message);
+                        showMessage(error.message, true);
                 }
             } finally {
-                loginBtn.disabled = false;
-                loginBtn.innerText = "Sign in";
+                // Re-enable button
+                signupBtn.disabled = false;
+                signupBtn.innerText = "Sign up";
             }
         });
     </script>
